@@ -1,0 +1,6 @@
+flink 支持批处理\流处理，如何做到API的统一
+
+
+==> table & SQL  关系型API
+
+留意 flink tableSQL \ sql

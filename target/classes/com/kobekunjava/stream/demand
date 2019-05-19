@@ -1,0 +1,21 @@
+需求：
+socket发送数据过来，把String类型转化成java对象，
+然后把Java对象保存到mysql数据库中
+
+1,PK,20
+2,Jepson,18
+
+create database imooc_flink;
+
+create table student(
+    id int(11) not null auto_increment,
+    name varchar(20),
+    age int(5),
+    primary key(id)
+);
+
+自定义sink总结：
+1）RichSinkFunction<T> T是想要写入的数据的类型
+2）重写方法
+        open/close 声明周期方法
+        invoke 每条记录执行一次
