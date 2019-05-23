@@ -1,0 +1,73 @@
+flink的三种时间：
+
+事件时间  event time  10:30     事件在设备上产生的时间。无论结果处理多少次，结果都是一致的
+一般程序都是按照事件时间处理
+
+
+摄入时间  ingestion time  11:00     进入到flink的时间，the source's current time
+
+Compared to processing time, it is slightly more expensive,
+but gives more predictable results. Because ingestion time uses stable
+timestamps (assigned once at the source), different window operations
+over the records will refer to the same timestamp
+与处理时间相比，它稍贵一些，但可以提供更可预测的结果。
+由于摄取时间使用稳定的时间戳（在源处分配一次），因此对记录的不同窗口操作将引用相同的时间戳
+
+whereas in processing time each window operator may assign the record to a different
+ window (based on the local system clock and any transport delay).
+ 然而而在处理时间中，每个窗口算子可以将记录分配给不同的窗口（基于本地系统时钟和任何传输延迟）
+  摄入事件不能处理乱序的事件，因为是以到source的时间为基准。
+
+处理时间  processing time  11:15  一个应用程序跑在9:15am，第一个小时级的处理时间窗包括9:15am
+-10:00am，下一个窗口包含10:00am-11:00am，依赖于系统时间
+
+处理时间不一定是准确的，因为可能由于网络的抖动，该时间窗包含前一个小时的事件
+
+
+windows:
+keyed windows  -->stream.keyBy(...).window...
+non-keyed windows   ---> stream.windowAll(...)...  所有的窗口逻辑执行在一个单独的任务上，并行度为1
+
+每个window有个触发器trigger和一个function(作用到window上的内容)
+
+windows assigners:
+窗口的分配器定义元素怎么被分配到窗口上，每个传入的数据分配给一个或者多个窗口
+
+tumbling windows 滚动窗口
+sliding windows 滑动窗口
+session windows 会话窗口
+global windows 全局窗口
+
+窗口大小[start timestamp,end timstamp)  maxTimestamp仍然属于这个窗口
+
+flink对于window来说有两大类：基于time的；基于count的
+
+tumbling 窗口：有固定的大小，不会有重叠
+sliding 窗口：会重叠(窗口大小小于滑动的大小，不会重叠)
+
+
+window function：
+The window function can be one of ReduceFunction,
+AggregateFunction, FoldFunction or ProcessWindowFunction.
+前两个更高效  reduceFunction 增量的，分多次执行
+
+processWindowFunction 一次性执行 适合排序等操作
+
+A ProcessWindowFunction gets an Iterable containing all the elements of the window,
+and a Context object with access to time and state information,
+which enables it to provide more flexibility than other window functions.
+This comes at the cost of performance and resource consumption,
+because elements cannot be incrementally aggregated
+but instead need to be buffered internally
+until the window is considered ready for processing.
+
+ProcessWindowFunction获取一个包含窗口所有元素的Iterable，
+和一个可以访问时间和状态信息的Context对象，
+这使它能够提供比其他窗口功能更多的灵活性。
+这是以性能和资源消耗为代价的，
+因为元素不能以递增方式聚合
+但需要在内部进行缓冲
+直到窗口被认为准备好进行处理。
+
+
+
