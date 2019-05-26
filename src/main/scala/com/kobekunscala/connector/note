@@ -1,0 +1,26 @@
+zookeeper：推荐使用kafka外部的zk
+kafka
+先启动zookeeper再启动kafka
+zookeeper部署：
+wget https://archive.cloudera.com/cdh5/cdh/5/zookeeper-3.4.5-cdh5.15.1.tar.gz
+ssh hadoop@hadoop000
+1、从~/software下解压到~/app下
+2、配置系统环境变量 ~/.bash_profile
+3、配置文件	$ZK_HOME/conf.zoo.cfg  dataDir不要放在默认的/tmp下
+4、启动ZK $ZK_HOME/bin/zkServer.sh start
+5、检查是否启动成功 jps QuorumPeerMain
+
+kafka部署:
+
+wget http://mirror.bit.edu.cn/apache/kafka/2.2.0/kafka_2.11-2.2.0.tgz
+ssh hadoop@hadoop000
+1、从~/software下解压到~/app下
+2、配置系统环境变量 ~/.bash_profile
+3、配置文件	 $KAFKA_HOME/config/server.properties  log.dirs不要放在默认的/tmp下
+4、启动kafka  $KAFKA_HOME/bin/kafka-server-start.sh -daemon /home/hadoop/app/kafka_2.11-2.2.0/config/server.properties
+5、检查是否启动成功 jps
+6、创建topic
+./kafka-topics.sh --create --zookeeper hadoop000:2181 --replication-factor 1 --partitions 1 --topic kobekuntest
+7、查看所有topic bin/kafka-topics.sh --list --zookeeper hadoop000:2181
+8、启动生产者  bin/kafka-console-producer.sh --broker-list hadoop000:9092 --topic kobekuntest
+9、启动消费者  bin/kafka-console-consumer.sh --bootstrap-server hadoop000:9092 --topic kobekuntest 
